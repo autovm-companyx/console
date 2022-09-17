@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+
+        <title>Console</title>
+
+        <!-- JQUERY -->
+        <script src="https://code.jquery.com/jquery-1.8.3.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.8.16/jquery-ui.min.js"></script>
+
+        <!-- WMKS -->
+        <script src="https://cdn.jsdelivr.net/npm/vmware-wmks@1.0.0/wmks.min.js"></script>
+
+        <!-- TAILWIND -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!-- CUSTOM -->
+        <script>
+            jQuery(document).ready(function() {
+
+                wmks = WMKS.createWMKS('console');
+
+                // CONNECTION
+                wmks.register('connectionstatechange', function(event, data) {
+
+                    // CONNECTING
+                    if (data.state == WMKS.CONST.ConnectionState.CONNECTING) {
+
+                        jQuery('#connecting').show();
+                    }
+
+                    // CONNECTED
+                    if (data.state == WMKS.CONST.ConnectionState.CONNECTED) {
+
+                        jQuery('#connecting').hide();
+                        jQuery('#connected').show();
+                    }
+
+                    // DISCONNECTED
+                    if (data.state == WMKS.CONST.ConnectionState.DISCONNECTED) {
+
+                        jQuery('#connecting').hide();
+                        jQuery('#connected').hide();
+                        jQuery('#disconnected').show();
+                    }
+                });
+
+                // FULL SCREEN
+                jQuery('#screen').click(function() {
+
+                    wmks.enterFullScreen();
+                });
+
+                // SEND CAD
+                jQuery('#cad').click(function() {
+
+                    wmks.sendCAD();
+                });
+
+                params = new URLSearchParams(window.location.search);
+
+                // FIND HOST
+                host = params.get('host');
+
+                // FIND PORT
+                port = params.get('port');
+
+                // FIND TICKET
+                ticket = params.get('ticket');
+
+                // CREATE ADDRESS
+                address = 'wss://@host:@port/ticket/@ticket';
+
+                parts = {
+                    '@host': host, '@port': port, '@ticket': ticket
+                }
+
+                for (part in parts) {
+
+                    address = address.replace(part, parts[part]);
+                }
+
+                wmks.connect(address);
+            });
+        </script>
+
+        <!-- CUSTOM -->
+        <style>
+            #console{
+                width: 1px;
+                height: 1px;
+            }
+        </style>
+    </head>
+    <body class="bg-black">
+
+        <!-- CONTAINER -->
+        <div class="lg:w-4/12 lg:mx-auto px-10 py-10">
+
+            <div class="flex flex-col space-y-5">
+
+                <!-- HEADER -->
+                <div class="bg-indigo-500 rounded-lg px-5 py-5">
+                    <h3 class="text-white text-sm font-bold">Welcome To The Console Client</h3>
+                </div>
+
+                <!-- CONNECTED -->
+                <div id="connected" class="hidden bg-green-500 rounded-lg px-5 py-5">
+
+                    <div class="flex justify-between items-center space-x-5">
+
+                        <!-- STATUS -->
+                        <div class="flex justify-start items-center space-x-5">
+                            <h3 class="text-white text-sm font-bold">Console Is Ready</h3>
+                        </div>
+
+                        <!-- BUTTONS -->
+                        <div class="flex justify-start items-center space-x-5">
+
+                            <!-- OPEN -->
+                            <div class="flex justify-start items-center space-x-5">
+                                <button id="screen" class="text-white text-sm font-bold">Open</button>
+                            </div>
+
+                            <!-- CAD -->
+                            <div class="flex justify-start items-center space-x-5">
+                                <button id="cad" class="text-white text-sm font-bold">CAD</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONNECTING -->
+                <div id="connecting" class="hidden bg-yellow-500 rounded-lg px-5 py-5">
+                    <h3 class="text-white text-sm font-bold">Connecting To The Console</h3>
+                </div>
+
+                <!-- DISCONNECTED -->
+                <div id="disconnected" class="hidden bg-red-500 rounded-lg px-5 py-5">
+                    <h3 class="text-white text-sm font-bold">Console Disconnected</h3>
+                </div>
+
+                <!-- CONSOLE -->
+                <div id="console"></div>
+            </div>
+        </div>
+    </body>
+</html>
